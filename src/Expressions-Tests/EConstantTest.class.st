@@ -7,5 +7,5 @@ Class {
 
 { #category : 'tests' }
 EConstantTest >> testEvaluate [
-	self assert: (EConstant new value: 5) evauluate equals: 5
+	self assert: (EConstant new value: 5) evaluate equals: 5
 ]

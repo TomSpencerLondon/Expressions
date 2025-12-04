@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : 'accessing' }
-EConstant >> evauluate [
+EConstant >> evaluate [
 	^ value
 ]
 
