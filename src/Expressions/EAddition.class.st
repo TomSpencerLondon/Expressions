@@ -1,9 +1,23 @@
+"
+I represent the addition of two expressions.
+
+I evaluate both sub-expressions and return their sum.
+
+Example:
+    | left right |
+    left := EConstant new value: 3.
+    right := EConstant new value: 5.
+    (EAddition new left: left; right: right) evaluate  ""Returns 8""
+
+Instance Variables:
+    left - the left operand expression
+    right - the right operand expression
+"
 Class {
 	#name : 'EAddition',
-	#superclass : 'Object',
+	#superclass : 'EExpression',
 	#instVars : [
-		'right',
-		'left'
+		'right'
 	],
 	#category : 'Expressions',
 	#package : 'Expressions'
