@@ -1,409 +1,577 @@
-# Die For Role Playing - Pharo Kata
+# Expressions - Pharo Kata
 
-A simple domain-specific language (DSL) for rolling dice, as used in role-playing games like Dungeons & Dragons.
+A mathematical expression interpreter that builds and evaluates expression trees like `(3 + 4) * 5`.
 
 ## Goal
 
-Build a DSL that allows expressions like:
+Build an interpreter for mathematical expressions using object-oriented design. Expressions form trees that can be evaluated, printed, and manipulated polymorphically.
 
 ```smalltalk
-(2 D20 + 1 D6) roll
+| expr |
+expr := EAddition new
+    left: (EConstant new value: 3);
+    right: (EMultiplication new
+        left: (EConstant new value: 4);
+        right: (EConstant new value: 5)).
+expr evaluate.  "Returns 23"
 ```
 
-This means: "Roll two 20-sided dice and one 6-sided die, then sum the results."
+## CRC Cards
 
-## Classes
+### EExpression
 
-### Die
+```
+┌─────────────────────────────────────────────────────────┐
+│ EExpression                                             │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Define common interface for   │ ENegation               │
+│   all expressions             │                         │
+│ Provide negated method        │                         │
+└───────────────────────────────┴─────────────────────────┘
+```
 
-A single die with a configurable number of faces.
+### EConstant
 
-| Method | Description |
-|--------|-------------|
-| `Die new` | Creates a die with 6 faces (default) |
-| `Die withFaces: n` | Creates a die with n faces |
-| `die faces` | Returns the number of faces |
-| `die roll` | Returns a random number between 1 and faces |
-| `die printOn: aStream` | Outputs 'a Die (n)' for debugging |
+```
+┌─────────────────────────────────────────────────────────┐
+│ EConstant                                               │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Hold a numeric value          │                         │
+│ Return value when evaluated   │                         │
+└───────────────────────────────┴─────────────────────────┘
+```
 
-### DieHandle
+### ENegation
 
-A collection of dice that can be rolled together.
+```
+┌─────────────────────────────────────────────────────────┐
+│ ENegation                                               │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Wrap an expression            │ EExpression (any)       │
+│ Negate the evaluated result   │                         │
+└───────────────────────────────┴─────────────────────────┘
+```
 
-| Method | Description |
-|--------|-------------|
-| `DieHandle new` | Creates an empty handle |
-| `handle addDie: aDie` | Adds a die to the handle |
-| `handle diceNumber` | Returns the count of dice |
-| `handle roll` | Rolls all dice and returns the sum |
-| `handle dice` | Returns the collection of dice |
-| `handle + anotherHandle` | Combines two handles into a new one |
+### EAddition
 
-### Integer Extension (*Dice protocol)
+```
+┌─────────────────────────────────────────────────────────┐
+│ EAddition                                               │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Hold left and right operands  │ EExpression (left)      │
+│ Return sum when evaluated     │ EExpression (right)     │
+└───────────────────────────────┴─────────────────────────┘
+```
 
-| Method | Description |
-|--------|-------------|
-| `n D: faces` | Creates a DieHandle with n dice of given faces |
-| `n D4` | Creates a DieHandle with n 4-sided dice |
-| `n D6` | Creates a DieHandle with n 6-sided dice |
-| `n D10` | Creates a DieHandle with n 10-sided dice |
-| `n D20` | Creates a DieHandle with n 20-sided dice |
+### EMultiplication
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ EMultiplication                                         │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Hold left and right operands  │ EExpression (left)      │
+│ Return product when evaluated │ EExpression (right)     │
+└───────────────────────────────┴─────────────────────────┘
+```
 
 ## Sequence Diagrams
 
-### Rolling a Single Die
+### Evaluating a Constant
 
 ```
-┌──────┐          ┌─────┐
-│Client│          │ Die │
-└──┬───┘          └──┬──┘
-   │                 │
-   │  Die new        │
-   │────────────────>│
-   │                 │
-   │   aDie          │
-   │<────────────────│
-   │                 │
-   │  roll           │
-   │────────────────>│
-   │                 │
-   │  faces atRandom │
-   │                 ├───┐
-   │                 │   │ (e.g., 4)
-   │                 │<──┘
-   │       4         │
-   │<────────────────│
-   │                 │
+┌──────┐          ┌──────────┐
+│Client│          │EConstant │
+└──┬───┘          └────┬─────┘
+   │                   │
+   │  value: 5         │
+   │──────────────────>│
+   │                   │
+   │  evaluate         │
+   │──────────────────>│
+   │                   │
+   │       5           │
+   │<──────────────────│
+   │                   │
 ```
 
-### Rolling a DieHandle
+### Evaluating a Negation
 
 ```
-┌──────┐       ┌──────────┐       ┌───────┐       ┌───────┐
-│Client│       │DieHandle │       │Die (6)│       │Die(10)│
-└──┬───┘       └────┬─────┘       └───┬───┘       └───┬───┘
-   │                │                 │               │
-   │  roll          │                 │               │
-   │───────────────>│                 │               │
-   │                │                 │               │
-   │                │  roll           │               │
-   │                │────────────────>│               │
-   │                │                 │               │
-   │                │       3         │               │
-   │                │<────────────────│               │
-   │                │                 │               │
-   │                │  roll           │               │
-   │                │────────────────────────────────>│
-   │                │                 │               │
-   │                │       7         │               │
-   │                │<────────────────────────────────│
-   │                │                 │               │
-   │                │  sum: 3 + 7 = 10│               │
-   │                ├───┐             │               │
-   │                │   │             │               │
-   │                │<──┘             │               │
-   │      10        │                 │               │
-   │<───────────────│                 │               │
-   │                │                 │               │
+┌──────┐       ┌──────────┐       ┌──────────┐
+│Client│       │ENegation │       │EConstant │
+└──┬───┘       └────┬─────┘       └────┬─────┘
+   │                │                  │
+   │  evaluate      │                  │
+   │───────────────>│                  │
+   │                │                  │
+   │                │  evaluate        │
+   │                │─────────────────>│
+   │                │                  │
+   │                │       5          │
+   │                │<─────────────────│
+   │                │                  │
+   │                │  5 negated = -5  │
+   │                ├───┐              │
+   │                │   │              │
+   │                │<──┘              │
+   │      -5        │                  │
+   │<───────────────│                  │
+   │                │                  │
 ```
 
-### Using the DSL (2 D: 6)
+### Evaluating an Addition (5 + 3)
 
 ```
-┌──────┐       ┌─────────┐       ┌──────────┐       ┌─────┐
-│Client│       │ Integer │       │DieHandle │       │ Die │
-└──┬───┘       └────┬────┘       └────┬─────┘       └──┬──┘
-   │                │                 │                │
-   │   2 D: 6       │                 │                │
-   │───────────────>│                 │                │
-   │                │                 │                │
-   │                │ DieHandle new   │                │
-   │                │────────────────>│                │
-   │                │                 │                │
-   │                │   handle        │                │
-   │                │<────────────────│                │
-   │                │                 │                │
-   │                │ 2 timesRepeat: [...]             │
-   │                ├───┐             │                │
-   │                │   │ Die withFaces: 6             │
-   │                │   │────────────────────────────>│
-   │                │   │             │                │
-   │                │   │           aDie               │
-   │                │   │<────────────────────────────│
-   │                │   │             │                │
-   │                │   │ addDie: aDie│                │
-   │                │   │────────────>│                │
-   │                │   │             │                │
-   │                │   │ (repeat)    │                │
-   │                │<──┘             │                │
-   │                │                 │                │
-   │    handle      │                 │                │
-   │<───────────────│                 │                │
-   │                │                 │                │
+┌──────┐       ┌──────────┐       ┌──────────┐       ┌──────────┐
+│Client│       │EAddition │       │EConstant │       │EConstant │
+│      │       │          │       │ (left=5) │       │(right=3) │
+└──┬───┘       └────┬─────┘       └────┬─────┘       └────┬─────┘
+   │                │                  │                  │
+   │  evaluate      │                  │                  │
+   │───────────────>│                  │                  │
+   │                │                  │                  │
+   │                │  evaluate        │                  │
+   │                │─────────────────>│                  │
+   │                │                  │                  │
+   │                │       5          │                  │
+   │                │<─────────────────│                  │
+   │                │                  │                  │
+   │                │  evaluate        │                  │
+   │                │─────────────────────────────────────>│
+   │                │                  │                  │
+   │                │       3          │                  │
+   │                │<─────────────────────────────────────│
+   │                │                  │                  │
+   │                │  5 + 3 = 8       │                  │
+   │                ├───┐              │                  │
+   │                │   │              │                  │
+   │                │<──┘              │                  │
+   │       8        │                  │                  │
+   │<───────────────│                  │                  │
+   │                │                  │                  │
 ```
 
-## Design Notes
-
-### Polymorphic API
-
-Both `Die` and `DieHandle` respond to `roll`. This means clients don't need to know which type they're dealing with:
+### Using negated Message
 
 ```
-       ┌─────────────┐
-       │   Client    │
-       └──────┬──────┘
-              │
-              │ roll
-              ▼
-       ┌──────────────┐
-       │  «protocol»  │
-       │   Rollable   │
-       │──────────────│
-       │ roll → Number│
-       └──────────────┘
-              △
-              │
-     ┌────────┴────────┐
-     │                 │
-┌────┴────┐      ┌─────┴─────┐
-│   Die   │      │ DieHandle │
-│─────────│      │───────────│
-│ faces   │      │ dice      │
-│─────────│      │───────────│
-│ roll    │      │ roll      │
-└─────────┘      └───────────┘
+┌──────┐       ┌──────────┐       ┌──────────┐
+│Client│       │EConstant │       │ENegation │
+└──┬───┘       └────┬─────┘       └────┬─────┘
+   │                │                  │
+   │  value: 5      │                  │
+   │───────────────>│                  │
+   │                │                  │
+   │  negated       │                  │
+   │───────────────>│                  │
+   │                │                  │
+   │                │  ENegation new   │
+   │                │  expression: self│
+   │                │─────────────────>│
+   │                │                  │
+   │                │    anENegation   │
+   │                │<─────────────────│
+   │                │                  │
+   │  anENegation   │                  │
+   │<───────────────│                  │
+   │                │                  │
 ```
 
-This supports the **"Don't ask, tell"** principle - clients just send `roll` without checking the object type.
-
-### Extending Core Classes
-
-The `D:` method is added to `Integer` using an **extension protocol** (`*Dice`). This keeps the method in the Dice package while extending a Kernel class:
+## Class Hierarchy
 
 ```
-┌─────────────────────────────────┐
-│ Kernel package                  │
-│   Integer class                 │
-│   └── (core methods)            │
-└─────────────────────────────────┘
-
-┌─────────────────────────────────┐
-│ Dice package                    │
-│   Die class                     │
-│   DieHandle class               │
-│   Integer (extension)           │
-│   └── protocol: *Dice           │
-│       └── D:                    │
-└─────────────────────────────────┘
+EExpression (abstract)
+├── EConstant          - Holds a numeric value
+├── ENegation          - Negates an expression
+├── EAddition          - Adds two expressions
+└── EMultiplication    - Multiplies two expressions
 ```
+
+## Expression Tree Diagram
+
+The expression `-5 + 3` creates this tree:
+
+```
+        anEAddition
+        /         \
+    left          right
+      |             |
+ anENegation   anEConstant
+      |             |
+ expression       value
+      |             |
+ anEConstant        3
+      |
+    value
+      |
+      5
+```
+
+## Design Patterns
+
+### Composite Pattern
+Expressions form a tree where:
+- Leaves: `EConstant`
+- Composites: `ENegation`, `EAddition`, `EMultiplication`
+
+All respond to `evaluate` polymorphically.
+
+### Template Method Pattern (future)
+When `printOn:` is added, `EBinaryExpression` will use a template that calls `operatorString` hook.
 
 ## Progress
 
-- [x] Step 1: Die with default faces
-- [x] Step 2: Rolling a die
-- [x] Step 3: Die with custom faces (withFaces:)
-- [x] Step 4: DieHandle creation and addDie:
-- [x] Step 5: Rolling a DieHandle
-- [x] Step 6: printOn: for better debugging
-- [x] Step 7: DSL - Integer >> D:
-- [x] Step 8: DSL - D4, D6, D10, D20
-- [x] Step 9: DieHandle addition (+)
+- [x] Step 1: EConstant with evaluate
+- [x] Step 2: ENegation
+- [x] Step 3: EAddition
+- [x] Step 4: EMultiplication
+- [x] Step 5: Introduce EExpression superclass
+- [x] Step 6: Add negated message to EConstant
+- [x] Step 7: Factor negated to EExpression
+- [ ] Step 8: Class creation methods (value:, left:right:, etc.)
+- [ ] Step 9: Example class methods (<sampleInstance>)
+- [ ] Step 10: printOn: for all expressions
+- [ ] Step 11: Optimize negated for ENegation
+- [ ] Step 12: Introduce EBinaryExpression
+- [ ] Step 13: Template/hook for operatorString
+- [ ] Step 14: EVariable with evaluateWith:
 
-**KATA COMPLETE!**
+## Key Concepts
+
+### Message vs Method
+- **Message**: An intent (what should be done) - e.g., `evaluate`
+- **Method**: Implementation (how it's done) - different per class
+
+Sending `evaluate` to different expressions invokes different methods.
+
+### Method Lookup
+1. Start in receiver's class
+2. If not found, look in superclass
+3. Continue up inheritance chain
+
+### Self-sends Create Hooks
+Every `self messageName` in a method creates a hook that subclasses can override.
+
+## Tests
+
+### EConstantTest
+- `testEvaluate` - Constant returns its value
+- `testNegated` - Negating returns ENegation
+
+### ENegationTest
+- `testEvaluate` - Returns negated value
+
+### EAdditionTest
+- `testEvaluate` - Returns sum
+
+### EMultiplicationTest
+- `testEvaluate` - Returns product
 
 ## Usage Examples
 
 ```smalltalk
-"Create and roll a single die"
-Die new roll.                    "Returns 1-6"
-(Die withFaces: 20) roll.        "Returns 1-20"
+"Simple constant"
+(EConstant new value: 5) evaluate.  "Returns 5"
 
-"Inspect a die"
-(Die withFaces: 6) printString.  "Returns 'a Die (6)'"
+"Negation"
+(EConstant new value: 5) negated evaluate.  "Returns -5"
 
-"Create and roll a handle of dice (manual way)"
-| handle |
-handle := DieHandle new.
-handle addDie: (Die withFaces: 6).
-handle addDie: (Die withFaces: 10).
-handle roll.                     "Returns 2-16"
+"Addition"
+| left right |
+left := EConstant new value: 3.
+right := EConstant new value: 5.
+(EAddition new left: left; right: right) evaluate.  "Returns 8"
 
-"Create and roll using DSL"
-(2 D: 6) roll.                   "Roll 2d6 - returns 2-12"
-(3 D: 20) roll.                  "Roll 3d20 - returns 3-60"
-(2 D: 6) diceNumber.             "Returns 2"
+"Multiplication"
+| left right |
+left := EConstant new value: 3.
+right := EConstant new value: 5.
+(EMultiplication new left: left; right: right) evaluate.  "Returns 15"
 
-"Shorthand DSL"
-(2 D20) roll.                    "Roll 2d20 - returns 2-40"
-(1 D6) roll.                     "Roll 1d6 - returns 1-6"
-
-"Combining handles"
-(2 D20 + 1 D6) roll.             "Roll 2d20 + 1d6 - returns 3-46"
-(2 D20 + 1 D6) diceNumber.       "Returns 3"
+"Complex expression: (3 + 4) * 5"
+| add mult |
+add := EAddition new
+    left: (EConstant new value: 3);
+    right: (EConstant new value: 4).
+mult := EMultiplication new
+    left: add;
+    right: (EConstant new value: 5).
+mult evaluate.  "Returns 35"
 ```
-
-## Tests
-
-Run all tests in the `Dice-Tests` package:
-
-### DieTest
-- `testInitializeIsOk` - Default die has 6 faces
-- `testRolling` - Roll returns value between 1 and faces
-- `testPrintOn` - Die prints as 'a Die (n)'
-
-### DieHandleTest
-- `testCreationAdding` - Can add dice to handle
-- `testAddingTwiceTheSameDice` - Can add same die twice
-- `testRoll` - Handle roll sums all dice
-- `testDSL` - `2 D: 6` creates handle with 2 dice
-- `testD20` - `2 D20` creates handle with 2 dice
-- `testAddition` - `(2 D20) + (1 D6)` creates handle with 3 dice
 
 ## Source Code
 
-### Package: Dice
+### Package: Expressions
 
-#### Class: Die
+#### Class: EExpression
+
+```smalltalk
+Object subclass: #EExpression
+    instanceVariableNames: ''
+    classVariableNames: ''
+    package: 'Expressions'
+```
+
+**Class Comment:**
+```
+I am the abstract superclass for all expression types in the expression interpreter.
+
+My subclasses represent different kinds of mathematical expressions that can be evaluated to produce a numeric result.
+
+All expressions respond to:
+- evaluate - returns the numeric value of this expression
+- negated - returns a new ENegation wrapping this expression
+
+Subclasses: EConstant, ENegation, EAddition, EMultiplication
+```
 
 **Instance Methods:**
 
 ```smalltalk
-faces
-    ^ faces
-
-faces: aNumber
-    faces := aNumber
-
-initialize
-    faces := 6
-
-printOn: aStream
-    super printOn: aStream.
-    aStream
-        nextPutAll: ' (';
-        print: faces;
-        nextPutAll: ')'
-
-roll
-    ^ faces atRandom
+negated
+    ^ ENegation new expression: self
 ```
 
-**Class Methods:**
+---
+
+#### Class: EConstant
 
 ```smalltalk
-withFaces: aNumber
-    | instance |
-    instance := self new.
-    instance faces: aNumber.
-    ^ instance
+EExpression subclass: #EConstant
+    instanceVariableNames: 'value'
+    classVariableNames: ''
+    package: 'Expressions'
 ```
 
-#### Class: DieHandle
+**Class Comment:**
+```
+I represent a constant numeric value in an expression tree.
+
+I am a leaf node - I have no sub-expressions.
+
+Example:
+    (EConstant new value: 5) evaluate  "Returns 5"
+
+Instance Variables:
+    value - the numeric value I hold
+```
 
 **Instance Methods:**
 
 ```smalltalk
-addDie: aDie
-    dice add: aDie
+evaluate
+    ^ value
 
-dice
-    ^ dice
-
-diceNumber
-    ^ dice size
-
-initialize
-    dice := OrderedCollection new
-
-roll
-    ^ dice sum: [ :each | each roll ]
-
-+ aDieHandle
-    | newHandle |
-    newHandle := DieHandle new.
-    dice do: [ :each | newHandle addDie: each ].
-    aDieHandle dice do: [ :each | newHandle addDie: each ].
-    ^ newHandle
+value: anInteger
+    value := anInteger
 ```
 
-#### Integer Extension (*Dice protocol)
+---
+
+#### Class: ENegation
 
 ```smalltalk
-D: aNumber
-    | handle |
-    handle := DieHandle new.
-    self timesRepeat: [ handle addDie: (Die withFaces: aNumber) ].
-    ^ handle
-
-D4
-    ^ self D: 4
-
-D6
-    ^ self D: 6
-
-D10
-    ^ self D: 10
-
-D20
-    ^ self D: 20
+EExpression subclass: #ENegation
+    instanceVariableNames: 'expression'
+    classVariableNames: ''
+    package: 'Expressions'
 ```
 
-### Package: Dice-Tests
+**Class Comment:**
+```
+I represent the negation of an expression.
 
-#### Class: DieTest
+I wrap another expression and return its negated value when evaluated.
+
+Example:
+    (ENegation new expression: (EConstant new value: 5)) evaluate  "Returns -5"
+    (EConstant new value: 5) negated evaluate  "Same thing, nicer syntax"
+
+Instance Variables:
+    expression - the expression to negate
+```
+
+**Instance Methods:**
 
 ```smalltalk
-testInitializeIsOk
-    self assert: Die new faces equals: 6
+expression: anExpression
+    expression := anExpression
 
-testPrintOn
-    self assert: (Die withFaces: 6) printString equals: 'a Die (6)'
-
-testRolling
-    | d |
-    d := Die new.
-    10 timesRepeat: [ self assert: (d roll between: 1 and: 6) ]
+evaluate
+    ^ expression evaluate negated
 ```
 
-#### Class: DieHandleTest
+---
+
+#### Class: EAddition
 
 ```smalltalk
-testAddingTwiceTheSameDice
-    | handle |
-    handle := DieHandle new.
-    handle addDie: (Die withFaces: 6).
-    self assert: handle diceNumber equals: 1.
-    handle addDie: (Die withFaces: 6).
-    self assert: handle diceNumber equals: 2
-
-testCreationAdding
-    | handle |
-    handle := DieHandle new
-        addDie: (Die withFaces: 6);
-        addDie: (Die withFaces: 10);
-        yourself.
-    self assert: handle diceNumber equals: 2
-
-testRoll
-    | handle |
-    handle := DieHandle new
-        addDie: (Die withFaces: 6);
-        addDie: (Die withFaces: 10);
-        yourself.
-    10 timesRepeat: [ self assert: (handle roll between: 2 and: 16) ]
-
-testDSL
-    | handle |
-    handle := 2 D: 6.
-    self assert: handle diceNumber equals: 2
-
-testD20
-    | handle |
-    handle := 2 D20.
-    self assert: handle diceNumber equals: 2
-
-testAddition
-    | handle |
-    handle := (2 D20) + (1 D6).
-    self assert: handle diceNumber equals: 3
+EExpression subclass: #EAddition
+    instanceVariableNames: 'left right'
+    classVariableNames: ''
+    package: 'Expressions'
 ```
+
+**Class Comment:**
+```
+I represent the addition of two expressions.
+
+I evaluate both sub-expressions and return their sum.
+
+Example:
+    | left right |
+    left := EConstant new value: 3.
+    right := EConstant new value: 5.
+    (EAddition new left: left; right: right) evaluate  "Returns 8"
+
+Instance Variables:
+    left - the left operand expression
+    right - the right operand expression
+```
+
+**Instance Methods:**
+
+```smalltalk
+left: anExpression
+    left := anExpression
+
+right: anExpression
+    right := anExpression
+
+evaluate
+    ^ left evaluate + right evaluate
+```
+
+---
+
+#### Class: EMultiplication
+
+```smalltalk
+EExpression subclass: #EMultiplication
+    instanceVariableNames: 'left right'
+    classVariableNames: ''
+    package: 'Expressions'
+```
+
+**Class Comment:**
+```
+I represent the multiplication of two expressions.
+
+I evaluate both sub-expressions and return their product.
+
+Example:
+    | left right |
+    left := EConstant new value: 3.
+    right := EConstant new value: 5.
+    (EMultiplication new left: left; right: right) evaluate  "Returns 15"
+
+Instance Variables:
+    left - the left operand expression
+    right - the right operand expression
+```
+
+**Instance Methods:**
+
+```smalltalk
+left: anExpression
+    left := anExpression
+
+right: anExpression
+    right := anExpression
+
+evaluate
+    ^ left evaluate * right evaluate
+```
+
+---
+
+### Package: Expressions-Tests
+
+#### Class: EConstantTest
+
+```smalltalk
+TestCase subclass: #EConstantTest
+    instanceVariableNames: ''
+    classVariableNames: ''
+    package: 'Expressions-Tests'
+```
+
+**Test Methods:**
+
+```smalltalk
+testEvaluate
+    self assert: (EConstant new value: 5) evaluate equals: 5
+
+testNegated
+    self assert: (EConstant new value: 6) negated evaluate equals: -6
+```
+
+---
+
+#### Class: ENegationTest
+
+```smalltalk
+TestCase subclass: #ENegationTest
+    instanceVariableNames: ''
+    classVariableNames: ''
+    package: 'Expressions-Tests'
+```
+
+**Test Methods:**
+
+```smalltalk
+testEvaluate
+    self assert: (ENegation new expression: (EConstant new value: 5)) evaluate equals: -5
+```
+
+---
+
+#### Class: EAdditionTest
+
+```smalltalk
+TestCase subclass: #EAdditionTest
+    instanceVariableNames: ''
+    classVariableNames: ''
+    package: 'Expressions-Tests'
+```
+
+**Test Methods:**
+
+```smalltalk
+testEvaluate
+    | ep1 ep2 |
+    ep1 := EConstant new value: 5.
+    ep2 := EConstant new value: 3.
+    self assert: (EAddition new right: ep1; left: ep2) evaluate equals: 8
+```
+
+---
+
+#### Class: EMultiplicationTest
+
+```smalltalk
+TestCase subclass: #EMultiplicationTest
+    instanceVariableNames: ''
+    classVariableNames: ''
+    package: 'Expressions-Tests'
+```
+
+**Test Methods:**
+
+```smalltalk
+testEvaluate
+    | ep1 ep2 |
+    ep1 := EConstant new value: 5.
+    ep2 := EConstant new value: 3.
+    self assert: (EMultiplication new right: ep1; left: ep2) evaluate equals: 15
+```
+ institution 
