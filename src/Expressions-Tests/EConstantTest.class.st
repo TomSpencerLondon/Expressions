@@ -6,6 +6,11 @@ Class {
 }
 
 { #category : 'tests' }
+EConstantTest >> testClassCreation [
+	self assert: (EConstant value: 5) evaluate equals: 5
+]
+
+{ #category : 'tests' }
 EConstantTest >> testEvaluate [
 	self assert: (EConstant new value: 5) evaluate equals: 5
 ]
@@ -13,4 +18,9 @@ EConstantTest >> testEvaluate [
 { #category : 'tests' }
 EConstantTest >> testNegated [
 	self assert: (EConstant new value: 6) negated evaluate equals: -6
+]
+
+{ #category : 'tests' }
+EConstantTest >> testPrintOn [
+	self assert: (EConstant value: 5) printString equals: '5'
 ]

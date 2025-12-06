@@ -20,6 +20,12 @@ Class {
 	#package : 'Expressions'
 }
 
+{ #category : 'as yet unclassified' }
+ENegation class >> sampleInstance [
+    <sampleInstance>
+    ^ self expression: (EConstant value: 5)
+]
+
 { #category : 'instance creation' }
 ENegation >> evaluate [
 	^ expression evaluate negated 

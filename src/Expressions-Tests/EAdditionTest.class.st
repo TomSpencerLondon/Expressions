@@ -6,6 +6,11 @@ Class {
 }
 
 { #category : 'tests' }
+EAdditionTest >> testClassCreation [
+	self assert: (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) evaluate equals: 8
+]
+
+{ #category : 'tests' }
 EAdditionTest >> testEvaluate [
 	| ep1 ep2 |
 	ep1 := EConstant new value: 5.

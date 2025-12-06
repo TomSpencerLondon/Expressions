@@ -9,6 +9,12 @@ Class {
 }
 
 { #category : 'tests' }
+EMultiplicationTest >> testClassCreation [
+	self assert: (EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) evaluate equals: 15
+
+]
+
+{ #category : 'tests' }
 EMultiplicationTest >> testEvaluate [
 	| ep1 ep2 |
 	ep1 := EConstant new value: 5.

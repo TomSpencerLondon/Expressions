@@ -29,6 +29,11 @@ EConstant >> negated [
 	^ ENegation new expression: self
 ]
 
+{ #category : 'arithmetic' }
+EConstant >> printOn: aStream [
+	aStream print: value
+]
+
 { #category : 'accessing' }
 EConstant >> value: anInteger [ 
 	value := anInteger

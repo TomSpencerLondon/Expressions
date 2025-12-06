@@ -24,6 +24,17 @@ Class {
 	#package : 'Expressions'
 }
 
+{ #category : 'instance creation' }
+EMultiplication class >> left: anExpression right: anotherExpression [ 
+	^ self new left: anExpression; right: anotherExpression
+]
+
+{ #category : 'instance creation' }
+EMultiplication class >> sampleInstance [
+    <sampleInstance>
+    ^ self left: (EConstant value: 3) right: (EConstant value: 5)
+]
+
 { #category : 'public access' }
 EMultiplication >> evaluate [
 	^ left evaluate * right evaluate

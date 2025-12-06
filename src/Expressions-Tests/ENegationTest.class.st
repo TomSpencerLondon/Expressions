@@ -6,6 +6,11 @@ Class {
 }
 
 { #category : 'tests' }
+ENegationTest >> testClassCreation [
+	self assert: (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) evaluate equals: 8
+]
+
+{ #category : 'tests' }
 ENegationTest >> testEvaluate [
 	self assert: (ENegation new expression: (EConstant new value: 5)) evaluate equals: -5
 ]
