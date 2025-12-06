@@ -32,7 +32,7 @@ EAddition >> left: anExpression [
 
 { #category : 'accessing' }
 EAddition >> operatorString [
-	^ ' + '
+	^ ' + '.
 ]
 
 { #category : 'accessing' }

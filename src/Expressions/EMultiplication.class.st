@@ -43,7 +43,7 @@ EMultiplication >> left: anExpression [
 
 { #category : 'public access' }
 EMultiplication >> operatorString [
-	^ ' * '
+	^ ' * '.
 ]
 
 { #category : 'accessing' }
