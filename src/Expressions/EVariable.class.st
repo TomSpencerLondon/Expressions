@@ -24,6 +24,12 @@ EVariable class >> named: aString [
 	^ self new name: aString
 ]
 
+{ #category : 'instance creation' }
+EVariable class >> sampleInstance [
+	<sampleInstance>
+	^ self named: 'x'
+]
+
 { #category : 'accessing' }
 EVariable >> evaluateWith: aDictionary [
 	^ aDictionary at: name

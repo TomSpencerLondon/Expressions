@@ -37,3 +37,8 @@ EVariableTest >> testEvaluateWithTwoVariables [
 EVariableTest >> testPrintOn [
 	self assert: (EVariable named: 'x') printString equals: 'x'
 ]
+
+{ #category : 'tests' }
+EVariableTest >> testSampleInstance [
+	self assert: EVariable sampleInstance printString equals: 'x'
+]
