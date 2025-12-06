@@ -45,6 +45,15 @@ EMultiplication >> left: anExpression [
 	left := anExpression
 ]
 
+{ #category : 'public access' }
+EMultiplication >> printOn: aStream [
+	aStream nextPut: $(.
+	left printOn: aStream.
+	aStream nextPutAll: ' * '.
+	right printOn: aStream.
+	aStream nextPut: $)
+]
+
 { #category : 'accessing' }
 EMultiplication >> right: anExpression [
 	right := anExpression

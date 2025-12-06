@@ -17,3 +17,8 @@ EAdditionTest >> testEvaluate [
 	ep2 := EConstant new value: 3.
 	self assert: (EAddition new right: ep1; left: ep2) evaluate equals: 8
 ]
+
+{ #category : 'tests' }
+EAdditionTest >> testPrintOn [
+	self assert: (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) printString equals: '(3 + 5)'
+]

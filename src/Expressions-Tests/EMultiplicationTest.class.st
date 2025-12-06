@@ -21,3 +21,8 @@ EMultiplicationTest >> testEvaluate [
 	ep2 := EConstant new value: 3.
 	self assert: (EMultiplication new right: ep1; left: ep2) evaluate equals: 15
 ]
+
+{ #category : 'tests' }
+EMultiplicationTest >> testPrintOn [
+	self assert: (EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) printString equals: '(3 * 5)'
+]
