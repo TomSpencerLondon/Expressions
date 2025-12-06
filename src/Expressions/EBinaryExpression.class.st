@@ -26,6 +26,11 @@ Class {
 }
 
 { #category : 'instance creation' }
+EBinaryExpression class >> left: anExpression right: anotherExpression [ 
+	^ self new left: anExpression; right: anotherExpression
+]
+
+{ #category : 'instance creation' }
 EBinaryExpression >> left: anExpression [
 	left := anExpression
 ]
