@@ -37,6 +37,11 @@ EMultiplication >> evaluate [
 ]
 
 { #category : 'accessing' }
+EMultiplication >> evaluateWith: aDictionary [
+	^ (left evaluateWith: aDictionary) * (right evaluateWith: aDictionary)
+]
+
+{ #category : 'accessing' }
 EMultiplication >> left: anExpression [
 	left := anExpression
 ]

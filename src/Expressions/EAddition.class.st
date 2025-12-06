@@ -26,6 +26,11 @@ EAddition >> evaluate [
 ]
 
 { #category : 'accessing' }
+EAddition >> evaluateWith: aDictionary [
+	^ (left evaluateWith: aDictionary) + (right evaluateWith: aDictionary)
+]
+
+{ #category : 'accessing' }
 EAddition >> left: anExpression [
 	left := anExpression
 ]
