@@ -17,6 +17,7 @@ Class {
 	#name : 'EAddition',
 	#superclass : 'EExpression',
 	#instVars : [
+		'left',
 		'right'
 	],
 	#category : 'Expressions',
