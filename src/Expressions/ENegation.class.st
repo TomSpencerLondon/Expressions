@@ -41,3 +41,11 @@ ENegation >> negated [
 	^ ENegation new expression: self
 	
 ]
+
+{ #category : 'instance creation' }
+ENegation >> printOn: aStream [
+	aStream nextPut: $-.
+	aStream nextPut: $(.
+	expression printOn: aStream.
+	aStream nextPut: $)
+]
