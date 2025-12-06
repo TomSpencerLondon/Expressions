@@ -16,6 +16,14 @@ ENegationTest >> testEvaluate [
 ]
 
 { #category : 'tests' }
+ENegationTest >> testEvaluateWith [
+	| expr bindings |
+	expr := ENegation expression: (EVariable named: 'x').
+	bindings := Dictionary newFrom: { 'x' -> 5 }.
+	self assert: (expr evaluateWith: bindings) equals: -5
+]
+
+{ #category : 'tests' }
 ENegationTest >> testNegatedNegated [
 	| constant |
 	constant := EConstant value: 5.

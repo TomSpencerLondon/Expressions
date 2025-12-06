@@ -23,6 +23,16 @@ EMultiplicationTest >> testEvaluate [
 ]
 
 { #category : 'tests' }
+EMultiplicationTest >> testEvaluateWith [
+	| expr bindings |
+	expr := EMultiplication
+		left: (EVariable named: 'x')
+		right: (EConstant value: 3).
+	bindings := Dictionary newFrom: { 'x' -> 5 }.
+	self assert: (expr evaluateWith: bindings) equals: 15
+]
+
+{ #category : 'tests' }
 EMultiplicationTest >> testPrintOn [
 	self assert: (EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) printString equals: '(3 * 5)'
 ]

@@ -32,6 +32,11 @@ ENegation >> evaluate [
 ]
 
 { #category : 'instance creation' }
+ENegation >> evaluateWith: aDictionary [
+	^ (expression evaluateWith: aDictionary) negated
+]
+
+{ #category : 'instance creation' }
 ENegation >> expression: anExpression [ 
 	expression := anExpression
 ]
