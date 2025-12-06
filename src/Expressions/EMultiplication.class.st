@@ -15,11 +15,7 @@ Instance Variables:
 "
 Class {
 	#name : 'EMultiplication',
-	#superclass : 'EExpression',
-	#instVars : [
-		'right',
-		'left'
-	],
+	#superclass : 'EBinaryExpression',
 	#category : 'Expressions',
 	#package : 'Expressions'
 }
@@ -46,12 +42,8 @@ EMultiplication >> left: anExpression [
 ]
 
 { #category : 'public access' }
-EMultiplication >> printOn: aStream [
-	aStream nextPut: $(.
-	left printOn: aStream.
-	aStream nextPutAll: ' * '.
-	right printOn: aStream.
-	aStream nextPut: $)
+EMultiplication >> operatorString [
+	^ ' * '
 ]
 
 { #category : 'accessing' }

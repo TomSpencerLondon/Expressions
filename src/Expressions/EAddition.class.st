@@ -15,11 +15,7 @@ Instance Variables:
 "
 Class {
 	#name : 'EAddition',
-	#superclass : 'EExpression',
-	#instVars : [
-		'left',
-		'right'
-	],
+	#superclass : 'EBinaryExpression',
 	#category : 'Expressions',
 	#package : 'Expressions'
 }
@@ -35,12 +31,8 @@ EAddition >> left: anExpression [
 ]
 
 { #category : 'accessing' }
-EAddition >> printOn: aStream [
-	aStream nextPut: $(.
-	left printOn: aStream.
-	aStream nextPutAll: ' + '.
-	right printOn: aStream.
-	aStream nextPut: $)
+EAddition >> operatorString [
+	^ ' + '
 ]
 
 { #category : 'accessing' }
