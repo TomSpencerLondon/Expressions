@@ -38,7 +38,7 @@ ENegation >> expression: anExpression [
 
 { #category : 'instance creation' }
 ENegation >> negated [
-	^ ENegation new expression: self
+	^ expression
 	
 ]
 

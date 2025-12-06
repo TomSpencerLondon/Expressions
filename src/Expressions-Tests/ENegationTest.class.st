@@ -16,6 +16,13 @@ ENegationTest >> testEvaluate [
 ]
 
 { #category : 'tests' }
+ENegationTest >> testNegatedNegated [
+	| constant |
+	constant := EConstant value: 5.
+	self assert: constant negated negated equals: constant
+]
+
+{ #category : 'tests' }
 ENegationTest >> testPrintOn [
 	self assert: (ENegation expression: (EConstant value: 5)) printString equals: '-(5)'
 ]
