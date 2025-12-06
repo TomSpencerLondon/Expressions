@@ -31,16 +31,6 @@ EAddition >> evaluateWith: aDictionary [
 ]
 
 { #category : 'accessing' }
-EAddition >> left: anExpression [
-	left := anExpression
-]
-
-{ #category : 'accessing' }
 EAddition >> operatorString [
 	^ ' + '.
-]
-
-{ #category : 'accessing' }
-EAddition >> right: anExpression [
-	right := anExpression
 ]

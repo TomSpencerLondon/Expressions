@@ -41,17 +41,7 @@ EMultiplication >> evaluateWith: aDictionary [
 	^ (left evaluateWith: aDictionary) * (right evaluateWith: aDictionary)
 ]
 
-{ #category : 'accessing' }
-EMultiplication >> left: anExpression [
-	left := anExpression
-]
-
 { #category : 'public access' }
 EMultiplication >> operatorString [
 	^ ' * '.
-]
-
-{ #category : 'accessing' }
-EMultiplication >> right: anExpression [
-	right := anExpression
 ]
