@@ -17,6 +17,11 @@ Class {
 }
 
 { #category : 'accessing' }
+EExpression >> accept: aVisitor [
+	self subclassResponsibility
+]
+
+{ #category : 'accessing' }
 EExpression >> evaluateWith: aDictionary [
 	| visitor |
 	visitor := EEvaluatorVisitor new.
