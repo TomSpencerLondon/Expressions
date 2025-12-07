@@ -33,6 +33,11 @@ EEvaluatorVisitor >> visitConstant: aConstant [
 ]
 
 { #category : 'visiting' }
+EEvaluatorVisitor >> visitMultiplication: aMultiplication [
+	^ (aMultiplication left accept: self) * (aMultiplication right accept: self)
+]
+
+{ #category : 'visiting' }
 EEvaluatorVisitor >> visitNegation: aNegation [ 
 	^ (aNegation expression accept: self) negated
 ]

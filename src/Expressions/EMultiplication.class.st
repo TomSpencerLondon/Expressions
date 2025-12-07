@@ -26,6 +26,11 @@ EMultiplication class >> sampleInstance [
     ^ self left: (EConstant value: 3) right: (EConstant value: 5)
 ]
 
+{ #category : 'accessing' }
+EMultiplication >> accept: aVisitor [
+	^ aVisitor visitMultiplication: self
+]
+
 { #category : 'public access' }
 EMultiplication >> evaluate [
 	^ left evaluate * right evaluate
