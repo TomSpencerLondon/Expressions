@@ -1,12 +1,12 @@
 Class {
-	#name : 'EEvaluatorVistorTest',
+	#name : 'EEvaluatorVisitorTest',
 	#superclass : 'TestCase',
 	#category : 'Expressions-Tests',
 	#package : 'Expressions-Tests'
 }
 
 { #category : 'tests' }
-EEvaluatorVistorTest >> testVisitAdditionReturnsAdditionResult [
+EEvaluatorVisitorTest >> testVisitAdditionReturnsAdditionResult [
 	| expression result |
 	expression := EAddition
 		left: (EConstant value: 7)
@@ -16,7 +16,7 @@ EEvaluatorVistorTest >> testVisitAdditionReturnsAdditionResult [
 ]
 
 { #category : 'tests' }
-EEvaluatorVistorTest >> testVisitConstantReturnsConstantValue [
+EEvaluatorVisitorTest >> testVisitConstantReturnsConstantValue [
 	| constant result |
 	constant := EConstant value: 5.
 	result := constant accept: EEvaluatorVisitor new.
