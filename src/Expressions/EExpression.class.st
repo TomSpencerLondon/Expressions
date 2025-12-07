@@ -16,8 +16,13 @@ Class {
 	#package : 'Expressions'
 }
 
+{ #category : 'visiting' }
+EExpression class >> accept: aVisitor [
+	self subclassResponsibility
+]
+
 { #category : 'accessing' }
-EExpression >> accept: aVisitor [
+EExpression >> accept: visitor [
 	self subclassResponsibility
 ]
 

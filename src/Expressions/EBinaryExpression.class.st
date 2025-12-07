@@ -31,6 +31,11 @@ EBinaryExpression class >> left: anExpression right: anotherExpression [
 ]
 
 { #category : 'instance creation' }
+EBinaryExpression >> accept: visitor [
+	self subclassResponsibility
+]
+
+{ #category : 'instance creation' }
 EBinaryExpression >> left [
 	^ left
 ]
