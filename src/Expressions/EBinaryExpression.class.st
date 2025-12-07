@@ -31,6 +31,11 @@ EBinaryExpression class >> left: anExpression right: anotherExpression [
 ]
 
 { #category : 'instance creation' }
+EBinaryExpression >> left [
+	^ left
+]
+
+{ #category : 'instance creation' }
 EBinaryExpression >> left: anExpression [
 	left := anExpression
 ]
@@ -47,6 +52,11 @@ EBinaryExpression >> printOn: aStream [
 	aStream nextPutAll: self operatorString.
 	right printOn: aStream.
 	aStream nextPut: $)
+]
+
+{ #category : 'instance creation' }
+EBinaryExpression >> right [
+	^ right
 ]
 
 { #category : 'instance creation' }

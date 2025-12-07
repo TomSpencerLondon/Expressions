@@ -21,6 +21,11 @@ Class {
 }
 
 { #category : 'accessing' }
+EAddition >> accept: aVisitor [
+	^ aVisitor visitAddition: self
+]
+
+{ #category : 'accessing' }
 EAddition >> evaluate [
 	^ left evaluate + right evaluate
 ]

@@ -23,6 +23,11 @@ EEvaluatorVisitor >> accept: aVisitor [
 ]
 
 { #category : 'visiting' }
+EEvaluatorVisitor >> visitAddition: anAddition [
+	^ (anAddition left accept: self) + (anAddition right accept: self)
+]
+
+{ #category : 'visiting' }
 EEvaluatorVisitor >> visitConstant: aConstant [
 	^ aConstant value
 ]
