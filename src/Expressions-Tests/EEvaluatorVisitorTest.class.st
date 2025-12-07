@@ -40,3 +40,13 @@ EEvaluatorVisitorTest >> testVisitNegationReturnsNegatedConstant [
 	result := expression accept: EEvaluatorVisitor new.
 	self assert: result equals: -7
 ]
+
+{ #category : 'tests' }
+EEvaluatorVisitorTest >> testVisitVariableReturnsVariableValue [
+	| expression result visitor |
+	expression := EVariable named: 'x'.
+	visitor := EEvaluatorVisitor new.
+	visitor at: 'x' put: 42.
+	result := expression accept: visitor.
+	self assert: result equals: 42
+]

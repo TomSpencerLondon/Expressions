@@ -13,6 +13,9 @@ Example:
 Class {
 	#name : 'EEvaluatorVisitor',
 	#superclass : 'Object',
+	#instVars : [
+		'bindings'
+	],
 	#category : 'Expressions',
 	#package : 'Expressions'
 }
@@ -20,6 +23,17 @@ Class {
 { #category : 'visiting' }
 EEvaluatorVisitor >> accept: aVisitor [
 	self subclassResponsibility
+]
+
+{ #category : 'visiting' }
+EEvaluatorVisitor >> at: aKey put: aValue [
+	bindings at: aKey put: aValue
+]
+
+{ #category : 'visiting' }
+EEvaluatorVisitor >> initialize [
+	super initialize.
+	bindings := Dictionary new
 ]
 
 { #category : 'visiting' }
@@ -40,4 +54,9 @@ EEvaluatorVisitor >> visitMultiplication: aMultiplication [
 { #category : 'visiting' }
 EEvaluatorVisitor >> visitNegation: aNegation [ 
 	^ (aNegation expression accept: self) negated
+]
+
+{ #category : 'visiting' }
+EEvaluatorVisitor >> visitVariable: aVariable [
+	^ bindings at: aVariable name
 ]

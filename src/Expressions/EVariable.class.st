@@ -31,8 +31,18 @@ EVariable class >> sampleInstance [
 ]
 
 { #category : 'accessing' }
+EVariable >> accept: aVisitor [
+	^ aVisitor visitVariable: self
+]
+
+{ #category : 'accessing' }
 EVariable >> evaluateWith: aDictionary [
 	^ aDictionary at: name
+]
+
+{ #category : 'accessing' }
+EVariable >> name [
+	^ name
 ]
 
 { #category : 'accessing' }
