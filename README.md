@@ -8,12 +8,13 @@ Build an interpreter for mathematical expressions using object-oriented design. 
 
 ```smalltalk
 | expr |
-expr := EAddition new
-    left: (EConstant new value: 3);
-    right: (EMultiplication new
-        left: (EConstant new value: 4);
-        right: (EConstant new value: 5)).
+expr := EAddition
+    left: (EConstant value: 3)
+    right: (EMultiplication
+        left: (EConstant value: 4)
+        right: (EConstant value: 5)).
 expr evaluate.  "Returns 23"
+expr printString.  "Returns '(3 + (4 * 5))'"
 ```
 
 ## CRC Cards
@@ -58,6 +59,20 @@ expr evaluate.  "Returns 23"
 └───────────────────────────────┴─────────────────────────┘
 ```
 
+### EBinaryExpression
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ EBinaryExpression                                       │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Hold left and right operands  │ EExpression (left)      │
+│ Provide common printing       │ EExpression (right)     │
+│ Define operatorString hook    │                         │
+└───────────────────────────────┴─────────────────────────┘
+```
+
 ### EAddition
 
 ```
@@ -66,8 +81,8 @@ expr evaluate.  "Returns 23"
 ├─────────────────────────────────────────────────────────┤
 │ Responsibilities              │ Collaborators           │
 ├───────────────────────────────┼─────────────────────────┤
-│ Hold left and right operands  │ EExpression (left)      │
-│ Return sum when evaluated     │ EExpression (right)     │
+│ Return sum when evaluated     │ EBinaryExpression       │
+│ Provide ' + ' operator string │                         │
 └───────────────────────────────┴─────────────────────────┘
 ```
 
@@ -79,8 +94,21 @@ expr evaluate.  "Returns 23"
 ├─────────────────────────────────────────────────────────┤
 │ Responsibilities              │ Collaborators           │
 ├───────────────────────────────┼─────────────────────────┤
-│ Hold left and right operands  │ EExpression (left)      │
-│ Return product when evaluated │ EExpression (right)     │
+│ Return product when evaluated │ EBinaryExpression       │
+│ Provide ' * ' operator string │                         │
+└───────────────────────────────┴─────────────────────────┘
+```
+
+### EVariable
+
+```
+┌─────────────────────────────────────────────────────────┐
+│ EVariable                                               │
+├─────────────────────────────────────────────────────────┤
+│ Responsibilities              │ Collaborators           │
+├───────────────────────────────┼─────────────────────────┤
+│ Hold a variable name          │ Dictionary (bindings)   │
+│ Look up value in bindings     │                         │
 └───────────────────────────────┴─────────────────────────┘
 ```
 
@@ -89,7 +117,7 @@ expr evaluate.  "Returns 23"
 ### Evaluating a Constant
 
 ```
-┌──────┐          ┌──────────┐
+┌──────┐          ┌─────────��┐
 │Client│          │EConstant │
 └──┬───┘          └────┬─────┘
    │                   │
@@ -161,6 +189,28 @@ expr evaluate.  "Returns 23"
    │                │                  │                  │
 ```
 
+### Evaluating a Variable with Bindings
+
+```
+┌──────┐       ┌──────────┐       ┌────────────┐
+│Client│       │EVariable │       │ Dictionary │
+└──┬───┘       └────┬─────┘       └─────┬──────┘
+   │                │                   │
+   │ evaluateWith:  │                   │
+   │ {'x'->5}       │                   │
+   │───────────────>│                   │
+   │                │                   │
+   │                │  at: 'x'          │
+   │                │──────────────────>│
+   │                │                   │
+   │                │       5           │
+   │                │<──────────────────│
+   │                │                   │
+   │       5        │                   │
+   │<───────────────│                   │
+   │                │                   │
+```
+
 ### Using negated Message
 
 ```
@@ -192,8 +242,10 @@ expr evaluate.  "Returns 23"
 EExpression (abstract)
 ├── EConstant          - Holds a numeric value
 ├── ENegation          - Negates an expression
-├── EAddition          - Adds two expressions
-└── EMultiplication    - Multiplies two expressions
+├── EVariable          - Holds a variable name, evaluated with bindings
+└── EBinaryExpression (abstract) - Base for binary operations
+    ├── EAddition          - Adds two expressions
+    └── EMultiplication    - Multiplies two expressions
 ```
 
 ## Expression Tree Diagram
@@ -220,13 +272,30 @@ The expression `-5 + 3` creates this tree:
 
 ### Composite Pattern
 Expressions form a tree where:
-- Leaves: `EConstant`
+- Leaves: `EConstant`, `EVariable`
 - Composites: `ENegation`, `EAddition`, `EMultiplication`
 
-All respond to `evaluate` polymorphically.
+All respond to `evaluate` and `evaluateWith:` polymorphically.
 
-### Template Method Pattern (future)
-When `printOn:` is added, `EBinaryExpression` will use a template that calls `operatorString` hook.
+### Template Method Pattern
+`EBinaryExpression` uses a template method for `printOn:` that calls the `operatorString` hook. Subclasses override `operatorString` to provide their operator symbol.
+
+```smalltalk
+"Template method in EBinaryExpression"
+printOn: aStream
+    aStream nextPut: $(.
+    left printOn: aStream.
+    aStream nextPutAll: self operatorString.  "Hook method"
+    right printOn: aStream.
+    aStream nextPut: $)
+
+"Hook implementations"
+EAddition>>operatorString
+    ^ ' + '
+
+EMultiplication>>operatorString
+    ^ ' * '
+```
 
 ## Progress
 
@@ -237,13 +306,13 @@ When `printOn:` is added, `EBinaryExpression` will use a template that calls `op
 - [x] Step 5: Introduce EExpression superclass
 - [x] Step 6: Add negated message to EConstant
 - [x] Step 7: Factor negated to EExpression
-- [ ] Step 8: Class creation methods (value:, left:right:, etc.)
-- [ ] Step 9: Example class methods (<sampleInstance>)
-- [ ] Step 10: printOn: for all expressions
-- [ ] Step 11: Optimize negated for ENegation
-- [ ] Step 12: Introduce EBinaryExpression
-- [ ] Step 13: Template/hook for operatorString
-- [ ] Step 14: EVariable with evaluateWith:
+- [x] Step 8: Class creation methods (value:, left:right:, etc.)
+- [x] Step 9: Example class methods (sampleInstance)
+- [x] Step 10: printOn: for all expressions
+- [x] Step 11: Optimize negated for ENegation
+- [x] Step 12: Introduce EBinaryExpression
+- [x] Step 13: Template/hook for operatorString
+- [x] Step 14: EVariable with evaluateWith:
 
 ## Key Concepts
 
@@ -261,51 +330,75 @@ Sending `evaluate` to different expressions invokes different methods.
 ### Self-sends Create Hooks
 Every `self messageName` in a method creates a hook that subclasses can override.
 
+### Subclass Responsibility
+Abstract methods use `self subclassResponsibility` to indicate subclasses must implement them.
+
 ## Tests
 
 ### EConstantTest
 - `testEvaluate` - Constant returns its value
+- `testClassCreation` - Class-side value: works
 - `testNegated` - Negating returns ENegation
+- `testPrintOn` - Prints the value
 
 ### ENegationTest
 - `testEvaluate` - Returns negated value
+- `testClassCreation` - Class-side expression: works
+- `testNegatedNegated` - Double negation returns original
+- `testPrintOn` - Prints as -(expr)
+- `testEvaluateWith` - Works with variable bindings
 
 ### EAdditionTest
 - `testEvaluate` - Returns sum
+- `testClassCreation` - Class-side left:right: works
+- `testPrintOn` - Prints as (left + right)
 
 ### EMultiplicationTest
 - `testEvaluate` - Returns product
+- `testClassCreation` - Class-side left:right: works
+- `testPrintOn` - Prints as (left * right)
+- `testEvaluateWith` - Works with variable bindings
+
+### EVariableTest
+- `testEvaluateWith` - Returns value from bindings
+- `testPrintOn` - Prints the variable name
+- `testEvaluateWithInAddition` - Variables work in expressions
+- `testEvaluateWithTwoVariables` - Multiple variables work
 
 ## Usage Examples
 
 ```smalltalk
 "Simple constant"
-(EConstant new value: 5) evaluate.  "Returns 5"
+(EConstant value: 5) evaluate.  "Returns 5"
 
 "Negation"
-(EConstant new value: 5) negated evaluate.  "Returns -5"
+(EConstant value: 5) negated evaluate.  "Returns -5"
 
 "Addition"
-| left right |
-left := EConstant new value: 3.
-right := EConstant new value: 5.
-(EAddition new left: left; right: right) evaluate.  "Returns 8"
+(EAddition left: (EConstant value: 3) right: (EConstant value: 5)) evaluate.  "Returns 8"
 
 "Multiplication"
-| left right |
-left := EConstant new value: 3.
-right := EConstant new value: 5.
-(EMultiplication new left: left; right: right) evaluate.  "Returns 15"
+(EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) evaluate.  "Returns 15"
 
 "Complex expression: (3 + 4) * 5"
 | add mult |
-add := EAddition new
-    left: (EConstant new value: 3);
-    right: (EConstant new value: 4).
-mult := EMultiplication new
-    left: add;
-    right: (EConstant new value: 5).
+add := EAddition left: (EConstant value: 3) right: (EConstant value: 4).
+mult := EMultiplication left: add right: (EConstant value: 5).
 mult evaluate.  "Returns 35"
+mult printString.  "Returns '((3 + 4) * 5)'"
+
+"Variables: x + 3 where x = 5"
+| expr bindings |
+expr := EAddition left: (EVariable named: 'x') right: (EConstant value: 3).
+bindings := Dictionary newFrom: { 'x' -> 5 }.
+expr evaluateWith: bindings.  "Returns 8"
+expr printString.  "Returns '(x + 3)'"
+
+"Multiple variables: x * y where x = 3, y = 4"
+| expr bindings |
+expr := EMultiplication left: (EVariable named: 'x') right: (EVariable named: 'y').
+bindings := Dictionary newFrom: { 'x' -> 3. 'y' -> 4 }.
+expr evaluateWith: bindings.  "Returns 12"
 ```
 
 ## Source Code
@@ -329,16 +422,10 @@ My subclasses represent different kinds of mathematical expressions that can be 
 
 All expressions respond to:
 - evaluate - returns the numeric value of this expression
+- evaluateWith: - returns the numeric value using variable bindings
 - negated - returns a new ENegation wrapping this expression
 
-Subclasses: EConstant, ENegation, EAddition, EMultiplication
-```
-
-**Instance Methods:**
-
-```smalltalk
-negated
-    ^ ENegation new expression: self
+Subclasses: EConstant, ENegation, EBinaryExpression, EVariable
 ```
 
 ---
@@ -359,20 +446,40 @@ I represent a constant numeric value in an expression tree.
 I am a leaf node - I have no sub-expressions.
 
 Example:
-    (EConstant new value: 5) evaluate  "Returns 5"
+    (EConstant value: 5) evaluate  "Returns 5"
 
 Instance Variables:
     value - the numeric value I hold
 ```
 
+**Class Methods:**
+
+```smalltalk
+value: anInteger
+    ^ self new value: anInteger
+
+sampleInstance
+    <sampleInstance>
+    ^ self value: 5
+```
+
 **Instance Methods:**
 
 ```smalltalk
+value: anInteger
+    value := anInteger
+
 evaluate
     ^ value
 
-value: anInteger
-    value := anInteger
+evaluateWith: aDictionary
+    ^ value
+
+negated
+    ^ ENegation new expression: self
+
+printOn: aStream
+    aStream print: value
 ```
 
 ---
@@ -393,11 +500,22 @@ I represent the negation of an expression.
 I wrap another expression and return its negated value when evaluated.
 
 Example:
-    (ENegation new expression: (EConstant new value: 5)) evaluate  "Returns -5"
-    (EConstant new value: 5) negated evaluate  "Same thing, nicer syntax"
+    (ENegation expression: (EConstant value: 5)) evaluate  "Returns -5"
+    (EConstant value: 5) negated evaluate  "Same thing, nicer syntax"
 
 Instance Variables:
     expression - the expression to negate
+```
+
+**Class Methods:**
+
+```smalltalk
+expression: anExpression
+    ^ self new expression: anExpression
+
+sampleInstance
+    <sampleInstance>
+    ^ self expression: (EConstant value: 5)
 ```
 
 **Instance Methods:**
@@ -408,6 +526,75 @@ expression: anExpression
 
 evaluate
     ^ expression evaluate negated
+
+evaluateWith: aDictionary
+    ^ (expression evaluateWith: aDictionary) negated
+
+negated
+    ^ expression
+
+printOn: aStream
+    aStream nextPut: $-.
+    aStream nextPut: $(.
+    expression printOn: aStream.
+    aStream nextPut: $)
+```
+
+---
+
+#### Class: EBinaryExpression
+
+```smalltalk
+EExpression subclass: #EBinaryExpression
+    instanceVariableNames: 'left right'
+    classVariableNames: ''
+    package: 'Expressions'
+```
+
+**Class Comment:**
+```
+I am the abstract superclass for binary expressions (expressions with two operands).
+
+I factor out the common structure of left and right operands shared by EAddition, EMultiplication, and other binary operations.
+
+Subclasses must implement:
+- evaluate - to define how the two operands are combined
+- evaluateWith: - to evaluate with variable bindings
+- operatorString - to provide the operator symbol for printing
+
+Instance Variables:
+    left - the left operand expression
+    right - the right operand expression
+
+Example (using a concrete subclass):
+    EAddition left: (EConstant value: 3) right: (EConstant value: 5)
+```
+
+**Class Methods:**
+
+```smalltalk
+left: anExpression right: anotherExpression
+    ^ self new left: anExpression; right: anotherExpression
+```
+
+**Instance Methods:**
+
+```smalltalk
+left: anExpression
+    left := anExpression
+
+right: anExpression
+    right := anExpression
+
+operatorString
+    self subclassResponsibility
+
+printOn: aStream
+    aStream nextPut: $(.
+    left printOn: aStream.
+    aStream nextPutAll: self operatorString.
+    right printOn: aStream.
+    aStream nextPut: $)
 ```
 
 ---
@@ -415,8 +602,8 @@ evaluate
 #### Class: EAddition
 
 ```smalltalk
-EExpression subclass: #EAddition
-    instanceVariableNames: 'left right'
+EBinaryExpression subclass: #EAddition
+    instanceVariableNames: ''
     classVariableNames: ''
     package: 'Expressions'
 ```
@@ -428,27 +615,28 @@ I represent the addition of two expressions.
 I evaluate both sub-expressions and return their sum.
 
 Example:
-    | left right |
-    left := EConstant new value: 3.
-    right := EConstant new value: 5.
-    (EAddition new left: left; right: right) evaluate  "Returns 8"
+    (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) evaluate  "Returns 8"
+```
 
-Instance Variables:
-    left - the left operand expression
-    right - the right operand expression
+**Class Methods:**
+
+```smalltalk
+sampleInstance
+    <sampleInstance>
+    ^ self left: (EConstant value: 3) right: (EConstant value: 5)
 ```
 
 **Instance Methods:**
 
 ```smalltalk
-left: anExpression
-    left := anExpression
-
-right: anExpression
-    right := anExpression
-
 evaluate
     ^ left evaluate + right evaluate
+
+evaluateWith: aDictionary
+    ^ (left evaluateWith: aDictionary) + (right evaluateWith: aDictionary)
+
+operatorString
+    ^ ' + '
 ```
 
 ---
@@ -456,8 +644,8 @@ evaluate
 #### Class: EMultiplication
 
 ```smalltalk
-EExpression subclass: #EMultiplication
-    instanceVariableNames: 'left right'
+EBinaryExpression subclass: #EMultiplication
+    instanceVariableNames: ''
     classVariableNames: ''
     package: 'Expressions'
 ```
@@ -469,27 +657,76 @@ I represent the multiplication of two expressions.
 I evaluate both sub-expressions and return their product.
 
 Example:
-    | left right |
-    left := EConstant new value: 3.
-    right := EConstant new value: 5.
-    (EMultiplication new left: left; right: right) evaluate  "Returns 15"
+    (EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) evaluate  "Returns 15"
+```
 
-Instance Variables:
-    left - the left operand expression
-    right - the right operand expression
+**Class Methods:**
+
+```smalltalk
+sampleInstance
+    <sampleInstance>
+    ^ self left: (EConstant value: 3) right: (EConstant value: 5)
 ```
 
 **Instance Methods:**
 
 ```smalltalk
-left: anExpression
-    left := anExpression
-
-right: anExpression
-    right := anExpression
-
 evaluate
     ^ left evaluate * right evaluate
+
+evaluateWith: aDictionary
+    ^ (left evaluateWith: aDictionary) * (right evaluateWith: aDictionary)
+
+operatorString
+    ^ ' * '
+```
+
+---
+
+#### Class: EVariable
+
+```smalltalk
+EExpression subclass: #EVariable
+    instanceVariableNames: 'name'
+    classVariableNames: ''
+    package: 'Expressions'
+```
+
+**Class Comment:**
+```
+I represent a variable in an expression tree.
+
+When evaluated with a dictionary of bindings, I look up my name and return the corresponding value.
+
+Example:
+    (EVariable named: 'x') evaluateWith: { 'x' -> 5 } asDictionary  "Returns 5"
+
+Instance Variables:
+    name - the variable name as a String
+```
+
+**Class Methods:**
+
+```smalltalk
+named: aString
+    ^ self new name: aString
+
+sampleInstance
+    <sampleInstance>
+    ^ self named: 'x'
+```
+
+**Instance Methods:**
+
+```smalltalk
+name: aString
+    name := aString
+
+evaluateWith: aDictionary
+    ^ aDictionary at: name
+
+printOn: aStream
+    aStream nextPutAll: name
 ```
 
 ---
@@ -511,8 +748,14 @@ TestCase subclass: #EConstantTest
 testEvaluate
     self assert: (EConstant new value: 5) evaluate equals: 5
 
+testClassCreation
+    self assert: (EConstant value: 5) evaluate equals: 5
+
 testNegated
     self assert: (EConstant new value: 6) negated evaluate equals: -6
+
+testPrintOn
+    self assert: (EConstant value: 5) printString equals: '5'
 ```
 
 ---
@@ -531,6 +774,23 @@ TestCase subclass: #ENegationTest
 ```smalltalk
 testEvaluate
     self assert: (ENegation new expression: (EConstant new value: 5)) evaluate equals: -5
+
+testClassCreation
+    self assert: (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) evaluate equals: 8
+
+testNegatedNegated
+    | constant |
+    constant := EConstant value: 5.
+    self assert: constant negated negated equals: constant
+
+testPrintOn
+    self assert: (ENegation expression: (EConstant value: 5)) printString equals: '-(5)'
+
+testEvaluateWith
+    | expr bindings |
+    expr := ENegation expression: (EVariable named: 'x').
+    bindings := Dictionary newFrom: { 'x' -> 5 }.
+    self assert: (expr evaluateWith: bindings) equals: -5
 ```
 
 ---
@@ -552,6 +812,12 @@ testEvaluate
     ep1 := EConstant new value: 5.
     ep2 := EConstant new value: 3.
     self assert: (EAddition new right: ep1; left: ep2) evaluate equals: 8
+
+testClassCreation
+    self assert: (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) evaluate equals: 8
+
+testPrintOn
+    self assert: (EAddition left: (EConstant value: 3) right: (EConstant value: 5)) printString equals: '(3 + 5)'
 ```
 
 ---
@@ -573,5 +839,52 @@ testEvaluate
     ep1 := EConstant new value: 5.
     ep2 := EConstant new value: 3.
     self assert: (EMultiplication new right: ep1; left: ep2) evaluate equals: 15
+
+testClassCreation
+    self assert: (EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) evaluate equals: 15
+
+testPrintOn
+    self assert: (EMultiplication left: (EConstant value: 3) right: (EConstant value: 5)) printString equals: '(3 * 5)'
+
+testEvaluateWith
+    | expr bindings |
+    expr := EMultiplication left: (EVariable named: 'x') right: (EConstant value: 3).
+    bindings := Dictionary newFrom: { 'x' -> 5 }.
+    self assert: (expr evaluateWith: bindings) equals: 15
 ```
- institution 
+
+---
+
+#### Class: EVariableTest
+
+```smalltalk
+TestCase subclass: #EVariableTest
+    instanceVariableNames: ''
+    classVariableNames: ''
+    package: 'Expressions-Tests'
+```
+
+**Test Methods:**
+
+```smalltalk
+testEvaluateWith
+    | expr bindings |
+    expr := EVariable named: 'x'.
+    bindings := Dictionary newFrom: { 'x' -> 5 }.
+    self assert: (expr evaluateWith: bindings) equals: 5
+
+testPrintOn
+    self assert: (EVariable named: 'x') printString equals: 'x'
+
+testEvaluateWithInAddition
+    | expr bindings |
+    expr := EAddition left: (EVariable named: 'x') right: (EConstant value: 3).
+    bindings := Dictionary newFrom: { 'x' -> 5 }.
+    self assert: (expr evaluateWith: bindings) equals: 8
+
+testEvaluateWithTwoVariables
+    | expr bindings |
+    expr := EMultiplication left: (EVariable named: 'x') right: (EVariable named: 'y').
+    bindings := Dictionary newFrom: { 'x' -> 3. 'y' -> 4 }.
+    self assert: (expr evaluateWith: bindings) equals: 12
+```
