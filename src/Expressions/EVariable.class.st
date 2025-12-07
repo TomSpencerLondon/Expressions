@@ -11,7 +11,7 @@ Instance Variables:
 "
 Class {
 	#name : 'EVariable',
-	#superclass : 'Object',
+	#superclass : 'EExpression',
 	#instVars : [
 		'name'
 	],
@@ -33,11 +33,6 @@ EVariable class >> sampleInstance [
 { #category : 'accessing' }
 EVariable >> accept: aVisitor [
 	^ aVisitor visitVariable: self
-]
-
-{ #category : 'accessing' }
-EVariable >> evaluateWith: aDictionary [
-	^ aDictionary at: name
 ]
 
 { #category : 'accessing' }

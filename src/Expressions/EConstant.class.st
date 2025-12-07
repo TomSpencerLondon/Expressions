@@ -29,11 +29,6 @@ EConstant >> evaluate [
 	^ value
 ]
 
-{ #category : 'accessing' }
-EConstant >> evaluateWith: aDictionary [
-	^ value
-]
-
 { #category : 'arithmetic' }
 EConstant >> negated [
 	^ ENegation new expression: self
