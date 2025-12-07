@@ -31,6 +31,11 @@ EEvaluatorVisitor >> at: aKey put: aValue [
 ]
 
 { #category : 'visiting' }
+EEvaluatorVisitor >> bindings: aDictionary [
+	bindings := aDictionary
+]
+
+{ #category : 'visiting' }
 EEvaluatorVisitor >> initialize [
 	super initialize.
 	bindings := Dictionary new

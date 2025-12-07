@@ -15,3 +15,11 @@ Class {
 	#category : 'Expressions',
 	#package : 'Expressions'
 }
+
+{ #category : 'accessing' }
+EExpression >> evaluateWith: aDictionary [
+	| visitor |
+	visitor := EEvaluatorVisitor new.
+	visitor bindings: aDictionary.
+	^ self accept: visitor
+]
