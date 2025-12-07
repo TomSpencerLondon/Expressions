@@ -83,14 +83,14 @@ EPrinterVisitor
 
 ## Visitor Pattern Refactoring Progress
 
-- [ ] Step 1: Add `accept:` to EExpression and EConstant, create EEvaluatorVisitor
-- [ ] Step 2: Handle EAddition with `accept:` and `visitAddition:`
-- [ ] Step 3: Handle ENegation with `accept:` and `visitNegation:`
-- [ ] Step 4: Handle EMultiplication with `accept:` and `visitMultiplication:`
-- [ ] Step 5: Handle EVariable with bindings support in visitor
-- [ ] Step 6: Create EPrinterVisitor
-- [ ] Step 7: Refactor `evaluateWith:` to use visitor
-- [ ] Step 8: Cleanup and documentation
+- [x] Step 1: Add `accept:` to EExpression and EConstant, create EEvaluatorVisitor
+- [x] Step 2: Handle EAddition with `accept:` and `visitAddition:`
+- [x] Step 3: Handle ENegation with `accept:` and `visitNegation:`
+- [x] Step 4: Handle EMultiplication with `accept:` and `visitMultiplication:`
+- [x] Step 5: Handle EVariable with bindings support in visitor
+- [x] Step 6: Create EPrinterVisitor
+- [x] Step 7: Connect old API (`evaluateWith:`) to new visitor pattern
+- [x] Step 8: Cleanup and documentation
 
 ## Step-by-Step Implementation
 
@@ -259,6 +259,56 @@ EPrinterVisitor >> visitMultiplication: aMultiplication
 
 EPrinterVisitor >> visitVariable: aVariable
     ^ aVariable name
+```
+
+### Step 7: Connect Old API to Visitor
+
+**Purpose:** Make the existing `evaluateWith:` method use the visitor pattern internally, so existing code continues to work unchanged.
+
+**Implementation:**
+```smalltalk
+EExpression >> evaluateWith: aDictionary
+    | visitor |
+    visitor := EEvaluatorVisitor new.
+    visitor bindings: aDictionary.
+    ^ self accept: visitor
+```
+
+**What this does:**
+- Existing code calling `evaluateWith:` continues to work
+- Internally, it creates a visitor, sets bindings, and delegates to `accept:`
+- This is the "bridge" between the old API and the new visitor pattern
+
+**Sequence Diagram:**
+```
+┌──────┐     ┌───────────┐     ┌─────────────────┐     ┌──────────┐
+│Client│     │EExpression│     │EEvaluatorVisitor│     │EConstant │
+└──┬───┘     └─────┬─────┘     └───────┬─────────┘     └────┬─────┘
+   │               │                   │                    │
+   │ evaluateWith: │                   │                    │
+   │ { x -> 5 }    │                   │                    │
+   │──────────────>│                   │                    │
+   │               │                   │                    │
+   │               │ new               │                    │
+   │               │──────────────────>│                    │
+   │               │                   │                    │
+   │               │ bindings: {x->5}  │                    │
+   │               │──────────────────>│                    │
+   │               │                   │                    │
+   │               │ accept: visitor   │                    │
+   │               │──────────────────>│                    │
+   │               │                   │                    │
+   │               │                   │ visitXxx:          │
+   │               │                   │───────────────────>│
+   │               │                   │                    │
+   │               │                   │       result       │
+   │               │                   │<───────────────────│
+   │               │                   │                    │
+   │               │       result      │                    │
+   │               │<──────────────────│                    │
+   │               │                   │                    │
+   │       result  │                   │                    │
+   │<──────────────│                   │                    │
 ```
 
 ## CRC Cards
