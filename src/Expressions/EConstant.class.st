@@ -20,6 +20,11 @@ Class {
 }
 
 { #category : 'accessing' }
+EConstant >> accept: aVisitor [
+	^ aVisitor visitConstant: self
+]
+
+{ #category : 'accessing' }
 EConstant >> evaluate [
 	^ value
 ]
@@ -37,6 +42,11 @@ EConstant >> negated [
 { #category : 'arithmetic' }
 EConstant >> printOn: aStream [
 	aStream print: value
+]
+
+{ #category : 'accessing' }
+EConstant >> value [
+	^ value
 ]
 
 { #category : 'accessing' }
