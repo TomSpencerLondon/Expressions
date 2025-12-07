@@ -27,6 +27,11 @@ ENegation class >> sampleInstance [
 ]
 
 { #category : 'instance creation' }
+ENegation >> accept: aVisitor [
+	^ aVisitor visitNegation: self
+]
+
+{ #category : 'instance creation' }
 ENegation >> evaluate [
 	^ expression evaluate negated 
 ]
@@ -34,6 +39,11 @@ ENegation >> evaluate [
 { #category : 'instance creation' }
 ENegation >> evaluateWith: aDictionary [
 	^ (expression evaluateWith: aDictionary) negated
+]
+
+{ #category : 'accessing' }
+ENegation >> expression [
+	^ expression
 ]
 
 { #category : 'instance creation' }

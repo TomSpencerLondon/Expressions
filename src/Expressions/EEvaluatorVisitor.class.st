@@ -31,3 +31,8 @@ EEvaluatorVisitor >> visitAddition: anAddition [
 EEvaluatorVisitor >> visitConstant: aConstant [
 	^ aConstant value
 ]
+
+{ #category : 'visiting' }
+EEvaluatorVisitor >> visitNegation: aNegation [ 
+	^ (aNegation expression accept: self) negated
+]
